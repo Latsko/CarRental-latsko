@@ -25,7 +25,4 @@ public class Rent {
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    @OneToOne
-    @JoinColumn(name = "reservation_id")
-    private Reservation reservation;
 }

@@ -8,6 +8,5 @@ import java.time.LocalDate;
 public record ReturnDTO(@NotNull Long employee,
                         String comments,
                         @NotNull LocalDate returnDate,
-                        BigDecimal upcharge,
-                        @NotNull Long reservationId) {
+                        BigDecimal upcharge) {
 }

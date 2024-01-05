@@ -97,20 +97,11 @@ public class ClientService {
         clientRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No client under that ID!"));
 
-        List<Rent> rentsAssociatedWithClient = rentRepository.findAll().stream()
-                .filter(rent -> rent.getReservation().getClient().getClient_id().equals(id))
-                .toList();
-        List<Returnal> returnsAssociatedWithClient = returnRepository.findAll().stream()
-                .filter(returnal -> returnal.getReservation().getClient().getClient_id().equals(id))
-                .toList();
         List<Reservation> reservationsAssociatedWithClient = reservationRepository.findAll().stream()
                 .filter(reservation -> reservation.getClient().getClient_id().equals(id))
                 .toList();
 
-        rentRepository.deleteAll(rentsAssociatedWithClient);
-        returnRepository.deleteAll(returnsAssociatedWithClient);
         reservationRepository.deleteAll(reservationsAssociatedWithClient);
-
         clientRepository.deleteById(id);
     }
 
