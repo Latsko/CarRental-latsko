@@ -23,7 +23,7 @@ import java.time.LocalDate;
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long reservation_id;
+    private Long reservationId;
 
     @NotNull
     @ManyToOne
@@ -58,12 +58,12 @@ public class Reservation {
     @JsonBackReference(value = "endBranch-reference")
     private Branch endBranch;
 
-    @OneToOne(cascade = CascadeType.REMOVE)
+    @OneToOne(mappedBy = "reservation", cascade = CascadeType.REMOVE)
     @JoinColumn(name = "rent_id")
     @JsonBackReference(value = "reservationRent-reference")
     private Rent rent;
 
-    @OneToOne(cascade = CascadeType.REMOVE)
+    @OneToOne(mappedBy = "reservation", cascade = CascadeType.REMOVE)
     @JoinColumn(name = "return_id")
     @JsonBackReference(value = "reservationReturnal-reference")
     private Returnal returnal;

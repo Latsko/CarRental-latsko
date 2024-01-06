@@ -5,8 +5,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.sda.carrental.exceptionHandling.ObjectNotFoundInRepositoryException;
 import pl.sda.carrental.exceptionHandling.ReservationTimeCollisionException;
-import pl.sda.carrental.model.*;
+import pl.sda.carrental.model.Branch;
+import pl.sda.carrental.model.Car;
+import pl.sda.carrental.model.Client;
 import pl.sda.carrental.model.DTO.ReservationDTO;
+import pl.sda.carrental.model.Reservation;
 import pl.sda.carrental.repository.*;
 
 import java.math.BigDecimal;
@@ -36,29 +39,6 @@ public class ReservationService {
                 .toList();
     }
     private ReservationDTO mapReservationToDTO(Reservation reservation) {
-        if(reservation.getRent() == null && reservation.getReturnal() == null) {
-            return new ReservationDTO(
-                    reservation.getClient().getClient_id(),
-                    reservation.getCar().getCar_id(),
-                    reservation.getStartDate(),
-                    reservation.getEndDate(),
-                    reservation.getStartBranch().getBranch_id(),
-                    reservation.getEndBranch().getBranch_id(),
-                    null,
-                    null);
-        } else if(reservation.getRent() != null && reservation.getReturnal() == null) {
-            return new ReservationDTO(
-                    reservation.getClient().getClient_id(),
-                    reservation.getCar().getCar_id(),
-                    reservation.getStartDate(),
-                    reservation.getEndDate(),
-                    reservation.getStartBranch().getBranch_id(),
-                    reservation.getEndBranch().getBranch_id(),
-                    reservation.getRent().getRent_id(),
-                    null);
-        } else if(reservation.getRent() == null && reservation.getReturnal() != null) {
-            throw new RuntimeException("Cannot return a car without rent!");
-        }
         return new ReservationDTO(
                 reservation.getClient().getClient_id(),
                 reservation.getCar().getCar_id(),
@@ -66,8 +46,9 @@ public class ReservationService {
                 reservation.getEndDate(),
                 reservation.getStartBranch().getBranch_id(),
                 reservation.getEndBranch().getBranch_id(),
-                reservation.getRent().getRent_id(),
-                reservation.getReturnal().getReturn_id());
+                reservation.getRent(),
+                reservation.getReturnal()
+        );
     }
 
     /**
@@ -123,25 +104,6 @@ public class ReservationService {
         Car carFromRepo = carRepository.findById(reservationDto.car_id())
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No car under that ID"));
 
-        Client clientFromRepo = clientRepository.findById(reservationDto.customer_id())
-                .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No customer under that ID"));
-        reservation.setClient(clientFromRepo);
-
-        Rent rentFromRepo;
-        if(reservationDto.rentId() != null) {
-             rentFromRepo = rentRepository.findById(reservationDto.rentId())
-                    .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No rent under that ID"));
-            reservation.setRent(rentFromRepo);
-        }
-
-
-        Returnal returnalFromRepo;
-        if(reservationDto.returnalId() != null) {
-            returnalFromRepo = returnRepository.findById(reservationDto.returnalId())
-                    .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No returnal under that ID"));
-            reservation.setReturnal(returnalFromRepo);
-        }
-
         if (!carFromRepo.getReservations().isEmpty()) {
             List<DateTimePeriod> timeCollision = carFromRepo.getReservations().stream()
                     .map(resObject -> new DateTimePeriod(resObject.getStartDate(), resObject.getEndDate()))
@@ -152,6 +114,10 @@ public class ReservationService {
             }
         }
         reservation.setCar(carFromRepo);
+
+        Client clientFromRepo = clientRepository.findById(reservationDto.customer_id())
+                .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No customer under that ID"));
+        reservation.setClient(clientFromRepo);
 
         long daysDifference = ChronoUnit.DAYS.between(reservation.getStartDate(), reservation.getEndDate());
         BigDecimal price = carFromRepo.getPrice().multiply(BigDecimal.valueOf(daysDifference));

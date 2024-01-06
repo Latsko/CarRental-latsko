@@ -36,4 +36,8 @@ public class Returnal {
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
+    @NotNull
+    @OneToOne
+    @JoinColumn(name = "reservation_id")
+    private Reservation reservation;
 }

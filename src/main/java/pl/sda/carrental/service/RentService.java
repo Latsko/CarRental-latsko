@@ -86,6 +86,11 @@ public class RentService {
      * @throws ObjectNotFoundInRepositoryException if no employee or reservation is found with the provided ID
      */
     private void updateRentDetails(RentDTO rentDTO, Rent rent) {
+        List<Long> reservationsIds = rentRepository.findRentalsWithReservationId(rentDTO.reservationId());
+        if(!reservationsIds.isEmpty()) {
+            throw new RentAlreadyExistsForReservationException("Rent already exists for reservation with id "
+                    + rentDTO.reservationId());
+        }
 
         Employee foundEmployee = employeeRepository.findById(rentDTO.employeeId())
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No employee under ID #"
@@ -94,5 +99,13 @@ public class RentService {
         rent.setEmployee(foundEmployee);
         rent.setComments(rentDTO.comments());
         rent.setRentDate(rentDTO.rentDate());
+
+        // ======== tutaj nie muszę ustawiać rezerwację? ==========
+        Reservation reservationFromRepository = reservationRepository.findById(rentDTO.reservationId())
+                .orElseThrow(() -> new ObjectNotFoundInRepositoryException("Reservation with id "
+                        + rentDTO.reservationId() + " not found"));
+
+        rent.setReservation(reservationFromRepository);
+        // ======================================================
     }
 }

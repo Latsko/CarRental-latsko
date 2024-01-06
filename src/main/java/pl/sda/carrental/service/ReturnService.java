@@ -42,6 +42,10 @@ public class ReturnService {
      */
     @Transactional
     public Returnal saveReturn(ReturnDTO returnDTO) {
+        List<Long> reservationsIds = returnRepository.findReturnsWithReservationId(returnDTO.reservationId());
+        if(!reservationsIds.isEmpty()) {
+            throw new ReturnAlreadyExistsForReservationException("Return already exists for reservation with id " + returnDTO.reservationId());
+        }
 
         Returnal returnal = new Returnal();
         updateReturnalDetails(returnDTO, returnal);
@@ -88,6 +92,12 @@ public class ReturnService {
                         .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No employee under ID #" + returnDTO.employee()));
 
         returnalToSave.setEmployee(employeeFromRepository);
+
+        Reservation reservationFromRepository = reservationRepository.findById(returnDTO.reservationId())
+                .orElseThrow(() -> new ObjectNotFoundInRepositoryException("Reservation with id "
+                        + returnDTO.reservationId() + " not found"));
+
+        returnalToSave.setReservation(reservationFromRepository);
     }
 
     /**

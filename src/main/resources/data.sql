@@ -64,35 +64,35 @@ VALUES ('Sophie', 'Bennett', '111 Hill St', 'sophie@example.com', 1),
        ('Stella', 'Murray', '999 Walnut St', 'stella@example.com', 3),
        ('Hudson', 'Simmons', '101 Cherry St', 'hudson@example.com', 1);
 
-INSERT INTO rent (comments, rent_date, employee_id)
-VALUES ('Good condition', '2024-01-10', 1),
-       ('Needs cleaning', '2024-01-12', 2),
-       ('Smooth ride', '2024-01-14', 3),
-       ('Great experience', '2024-01-16', 4),
-       ('Minor issue with AC', '2024-01-18', 5),
-       ('Comfortable interior', '2024-01-20', 6),
-       ('Excellent mileage', '2024-01-22', 7),
-       ('Fantastic handling', '2024-01-24', 8);
 
-INSERT INTO return_process (comments, return_date, upcharge, employee_id)
-VALUES ('Clean and tidy', '2024-01-15', 50.00, 1),
-       ('Minor scratches', '2024-01-17', 30.00, 2),
-       ('Fuel tank full', '2024-01-19', 20.00, 3),
-       ('Smooth return', '2024-01-21', 10.00, 4),
-       ('Needs cleaning', '2024-01-23', 40.00, 5),
-       ('Issues with brakes', '2024-01-25', 60.00, 6),
-       ('Excellent condition', '2024-01-27', 15.00, 7),
-       ('Great experience', '2024-01-29', 25.00, 8);
-
-INSERT INTO reservation (start_date, end_date, price, start_branch_id, end_branch_id, car_id, client_id, rent_id, return_id)
-VALUES ('2024-01-10', '2024-01-15', 350.00, 1, 2, 1, 1, 1, 1),
-       ('2024-01-12', '2024-01-20', 400.00, 2, 3, 2, 2, 2, 2),
-       ('2024-01-14', '2024-01-18', 300.00, 3, 1, 3, 3, 3, 3),
-       ('2024-01-16', '2024-01-22', 450.00, 1, 2, 4, 4, 4, 4),
-       ('2024-01-18', '2024-01-25', 500.00, 2, 3, 5, 5, 5, 5),
-       ('2024-01-20', '2024-01-27', 380.00, 3, 1, 6, 6, 6, 6),
-       ('2024-01-22', '2024-01-29', 420.00, 1, 2, 7, 7, 7, 7),
-       ('2024-01-24', '2024-01-31', 480.00, 2, 3, 8, 8, 8, 8);
 INSERT INTO reservation (start_date, end_date, price, start_branch_id, end_branch_id, car_id, client_id)
-VALUES ('2024-01-26', '2024-02-02', 520.00, 3, 1, 9, 9),
+VALUES ('2024-01-10', '2024-01-15', 350.00, 1, 2, 1, 1),
+       ('2024-01-12', '2024-01-20', 400.00, 2, 3, 2, 2),
+       ('2024-01-14', '2024-01-18', 300.00, 3, 1, 3, 3),
+       ('2024-01-16', '2024-01-22', 450.00, 1, 2, 4, 4),
+       ('2024-01-18', '2024-01-25', 500.00, 2, 3, 5, 5),
+       ('2024-01-20', '2024-01-27', 380.00, 3, 1, 6, 6),
+       ('2024-01-22', '2024-01-29', 420.00, 1, 2, 7, 7),
+       ('2024-01-24', '2024-01-31', 480.00, 2, 3, 8, 8),
+       ('2024-01-26', '2024-02-02', 520.00, 3, 1, 9, 9),
        ('2024-01-28', '2024-02-04', 390.00, 1, 2, 10, 10);
+
+INSERT INTO rent (comments, rent_date, reservation_id, employee_id)
+VALUES ('Good condition', '2024-01-10', 1, 1),
+       ('Needs cleaning', '2024-01-12', 2, 2),
+       ('Smooth ride', '2024-01-14', 3, 3),
+       ('Great experience', '2024-01-16', 4, 4),
+       ('Minor issue with AC', '2024-01-18', 5, 5),
+       ('Comfortable interior', '2024-01-20', 6, 6),
+       ('Excellent mileage', '2024-01-22', 7, 7),
+       ('Fantastic handling', '2024-01-24', 8, 8);
+
+INSERT INTO return_process (comments, return_date, upcharge, reservation_id, employee_id)
+VALUES ('Clean and tidy', '2024-01-15', 50.00, 1, 1),
+       ('Minor scratches', '2024-01-17', 30.00, 2, 2),
+       ('Fuel tank full', '2024-01-19', 20.00, 3, 3),
+       ('Smooth return', '2024-01-21', 10.00, 4, 4),
+       ('Needs cleaning', '2024-01-23', 40.00, 5, 5),
+       ('Issues with brakes', '2024-01-25', 60.00, 6, 6),
+       ('Excellent condition', '2024-01-27', 15.00, 7, 7),
+       ('Great experience', '2024-01-29', 25.00, 8, 8);
