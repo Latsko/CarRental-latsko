@@ -78,7 +78,6 @@ public class BranchService {
         found.setName(branch.getName());
 
         branchRepository.deleteById(id);
-
         return branchRepository.save(found);
     }
 
