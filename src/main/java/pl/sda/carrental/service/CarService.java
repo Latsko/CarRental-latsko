@@ -101,15 +101,7 @@ public class CarService {
         carRepository.findById(id).orElseThrow(() ->
                 new ObjectNotFoundInRepositoryException("No car under ID #" + id));
 
-        List<Rent> rentsAssociatedWithCar = rentRepository.findAll().stream()
-                .filter(rent -> rent.getReservation().getCar().getCar_id().equals(id))
-                .toList();
-        List<Returnal> returnsAssociatedWithCar = returnRepository.findAll().stream()
-                .filter(returnal -> returnal.getReservation().getCar().getCar_id().equals(id))
-                .toList();
-
-        rentRepository.deleteAll(rentsAssociatedWithCar);
-        returnRepository.deleteAll(returnsAssociatedWithCar);
+        ReservationService.removeRentsAndReturnalsAssociatedWithReservation(id, rentRepository, returnRepository);
 
         carRepository.deleteById(id);
     }

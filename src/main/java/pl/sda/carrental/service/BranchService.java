@@ -7,9 +7,7 @@ import pl.sda.carrental.exceptionHandling.ObjectNotFoundInRepositoryException;
 import pl.sda.carrental.model.Branch;
 import pl.sda.carrental.model.Car;
 import pl.sda.carrental.model.Employee;
-import pl.sda.carrental.repository.BranchRepository;
-import pl.sda.carrental.repository.CarRepository;
-import pl.sda.carrental.repository.EmployeeRepository;
+import pl.sda.carrental.repository.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -20,6 +18,8 @@ public class BranchService {
     private final BranchRepository branchRepository;
     private final CarRepository carRepository;
     private final EmployeeRepository employeeRepository;
+    private final RentRepository rentRepository;
+    private final ReturnRepository returnRepository;
 
     /**
      * Adds a new branch to the repository.
@@ -53,9 +53,9 @@ public class BranchService {
         Branch branch = branchRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No branch under  ID #" + id));
 
+        branch.getEmployees().clear();
         branch.getClients().clear();
         branch.getCars().clear();
-        branch.getEmployees().clear();
 
         branchRepository.deleteById(id);
     }

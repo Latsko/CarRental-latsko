@@ -5,15 +5,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.sda.carrental.exceptionHandling.ObjectNotFoundInRepositoryException;
 import pl.sda.carrental.exceptionHandling.ReservationTimeCollisionException;
-import pl.sda.carrental.model.Branch;
-import pl.sda.carrental.model.Car;
-import pl.sda.carrental.model.Client;
+import pl.sda.carrental.model.*;
 import pl.sda.carrental.model.DTO.ReservationDTO;
-import pl.sda.carrental.model.Reservation;
-import pl.sda.carrental.repository.BranchRepository;
-import pl.sda.carrental.repository.CarRepository;
-import pl.sda.carrental.repository.ClientRepository;
-import pl.sda.carrental.repository.ReservationRepository;
+import pl.sda.carrental.repository.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,6 +22,8 @@ public class ReservationService {
     private final BranchRepository branchRepository;
     private final CarRepository carRepository;
     private final ClientRepository clientRepository;
+    private final RentRepository rentRepository;
+    private final ReturnRepository returnRepository;
 
     /**
      * Gets all Reservation Objects
@@ -173,7 +169,21 @@ public class ReservationService {
     public void deleteReservationById(Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No reservation under ID #" + id));
+
+        removeRentsAndReturnalsAssociatedWithReservation(id, rentRepository, returnRepository);
         reservationRepository.delete(reservation);
+    }
+
+    static void removeRentsAndReturnalsAssociatedWithReservation(Long id, RentRepository rentRepository, ReturnRepository returnRepository) {
+        List<Rent> rentsAssociatedWithCar = rentRepository.findAll().stream()
+                .filter(rent -> rent.getReservation().getCar().getCar_id().equals(id))
+                .toList();
+        List<Returnal> returnsAssociatedWithCar = returnRepository.findAll().stream()
+                .filter(returnal -> returnal.getReservation().getCar().getCar_id().equals(id))
+                .toList();
+
+        rentRepository.deleteAll(rentsAssociatedWithCar);
+        returnRepository.deleteAll(returnsAssociatedWithCar);
     }
 }
 
