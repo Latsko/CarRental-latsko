@@ -1,12 +1,15 @@
 package pl.sda.carrental.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.sda.carrental.exceptionHandling.ObjectAlreadyAssignedToBranchException;
 import pl.sda.carrental.exceptionHandling.ObjectNotFoundInRepositoryException;
-import pl.sda.carrental.model.*;
-import pl.sda.carrental.repository.*;
+import pl.sda.carrental.model.Branch;
+import pl.sda.carrental.model.Client;
+import pl.sda.carrental.model.Reservation;
+import pl.sda.carrental.repository.BranchRepository;
+import pl.sda.carrental.repository.ClientRepository;
+import pl.sda.carrental.repository.ReservationRepository;
 
 import java.util.List;
 import java.util.Objects;
@@ -16,8 +19,6 @@ import java.util.Objects;
 public class ClientService {
     private final ClientRepository clientRepository;
     private final BranchRepository branchRepository;
-    private final RentRepository rentRepository;
-    private final ReturnRepository returnRepository;
     private final ReservationRepository reservationRepository;
 
     /**
@@ -46,7 +47,6 @@ public class ClientService {
      *
      * @param client The Client object representing the new client to be added.
      */
-    @Transactional
     public void addClient(Client client) {
         clientRepository.save(client);
     }
@@ -62,7 +62,6 @@ public class ClientService {
      * @return The updated Client object.
      * @throws ObjectNotFoundInRepositoryException if no client is found under the provided ID.
      */
-    @Transactional
     public void editClient(Long id, Client client) {
         Client childClient = clientRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No client under that ID!"));
@@ -95,25 +94,15 @@ public class ClientService {
      * @param id The ID of the client to be removed.
      * @throws ObjectNotFoundInRepositoryException if no client is found under the provided ID.
      */
-    @Transactional
     public void removeClient(Long id) {
         clientRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No client under that ID!"));
 
-        List<Rent> rentsAssociatedWithClient = rentRepository.findAll().stream()
-                .filter(rent -> rent.getReservation().getClient().getClient_id().equals(id))
-                .toList();
-        List<Returnal> returnsAssociatedWithClient = returnRepository.findAll().stream()
-                .filter(returnal -> returnal.getReservation().getClient().getClient_id().equals(id))
-                .toList();
         List<Reservation> reservationsAssociatedWithClient = reservationRepository.findAll().stream()
                 .filter(reservation -> reservation.getClient().getClient_id().equals(id))
                 .toList();
 
-        rentRepository.deleteAll(rentsAssociatedWithClient);
-        returnRepository.deleteAll(returnsAssociatedWithClient);
         reservationRepository.deleteAll(reservationsAssociatedWithClient);
-
         clientRepository.deleteById(id);
     }
 
@@ -129,7 +118,6 @@ public class ClientService {
      * @throws ObjectNotFoundInRepositoryException    if no client or branch is found under the provided IDs.
      * @throws ObjectAlreadyAssignedToBranchException if the client is already assigned to an existing branch.
      */
-    @Transactional
     public void assignClientToBranch(Long clientId, Long branchId) {
         Client foundClient = clientRepository.findById(clientId)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No client under ID #" + clientId));
@@ -154,7 +142,6 @@ public class ClientService {
      * @param branchId The ID of the branch from which the client will be removed.
      * @throws ObjectNotFoundInRepositoryException if no branch or client is found under the provided IDs.
      */
-    @Transactional
     public void removeClientFromBranch(Long clientId, Long branchId) {
         Branch foundBranch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No branch under ID #" + branchId));

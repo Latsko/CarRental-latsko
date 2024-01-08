@@ -1,6 +1,5 @@
 package pl.sda.carrental.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.sda.carrental.exceptionHandling.ObjectAlreadyAssignedToBranchException;
@@ -8,8 +7,9 @@ import pl.sda.carrental.exceptionHandling.ObjectNotFoundInRepositoryException;
 import pl.sda.carrental.model.Branch;
 import pl.sda.carrental.model.Car;
 import pl.sda.carrental.model.Employee;
-import pl.sda.carrental.model.Reservation;
-import pl.sda.carrental.repository.*;
+import pl.sda.carrental.repository.BranchRepository;
+import pl.sda.carrental.repository.CarRepository;
+import pl.sda.carrental.repository.EmployeeRepository;
 
 import java.util.List;
 import java.util.Objects;
@@ -20,19 +20,15 @@ public class BranchService {
     private final BranchRepository branchRepository;
     private final CarRepository carRepository;
     private final EmployeeRepository employeeRepository;
-    private final ReservationRepository reservationRepository;
-    private final CarRentalRepository carRentalRepository;
 
     /**
      * Adds a new branch to the repository.
      *
      * @param branch The Branch object to be added.
      */
-    @Transactional
     public void addBranch(Branch branch) {
-        if(!carRentalRepository.findAll().isEmpty()) {
-            branch.setCarRental(carRentalRepository.findAll().stream().findFirst().orElseThrow(() ->
-                    new ObjectNotFoundInRepositoryException("No Car Rental for branch to be assigned to")));
+        if(!branchRepository.findAll().isEmpty()) {
+            throw new ObjectAlreadyAssignedToBranchException("Rent already exists!");
         }
         branchRepository.save(branch);
     }
@@ -53,17 +49,9 @@ public class BranchService {
      * @param id The ID of the branch to be removed.
      * @throws ObjectNotFoundInRepositoryException if no branch is found under the provided ID.
      */
-    @Transactional
     public void removeBranch(Long id) {
         Branch branch = branchRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No branch under  ID #" + id));
-
-        List<Reservation> reservationsWithThisBranch = reservationRepository.findAll().stream()
-                .filter(reservation -> reservation.getStartBranch().getBranch_id().equals(id) ||
-                        reservation.getEndBranch().getBranch_id().equals(id))
-                .toList();
-
-        reservationRepository.deleteAll(reservationsWithThisBranch);
 
         branch.getClients().clear();
         branch.getCars().clear();
@@ -82,13 +70,14 @@ public class BranchService {
      * @return The edited Branch object after updating the details.
      * @throws ObjectNotFoundInRepositoryException if no branch is found under the provided ID.
      */
-    @Transactional
     public Branch editBranch(Long id, Branch branch) {
         Branch found = branchRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No branch under  ID #" + id));
 
         found.setAddress(branch.getAddress());
         found.setName(branch.getName());
+
+        branchRepository.deleteById(id);
 
         return branchRepository.save(found);
     }
@@ -114,7 +103,6 @@ public class BranchService {
      * @param car The Car object to be added.
      * @throws ObjectNotFoundInRepositoryException if no branches exist or if no branch is found under the provided ID.
      */
-    @Transactional
     public void addCarToBranchByAccordingId(Long id, Car car) {
         if (branchRepository.findAll().isEmpty()) {
             throw new ObjectNotFoundInRepositoryException("There are no created branches currently");
@@ -137,7 +125,6 @@ public class BranchService {
      * @param branchId The ID of the branch from which the car will be removed.
      * @throws ObjectNotFoundInRepositoryException if no branch is found under the provided branch ID or if the specified car is not assigned to that branch.
      */
-    @Transactional
     public void removeCarFromBranch(Long carId, Long branchId) {
         Branch foundBranch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No branch under ID #" + branchId));
@@ -166,7 +153,6 @@ public class BranchService {
      * @throws ObjectNotFoundInRepositoryException      if no car is found under the provided car ID or if no branch is found under the provided branch ID.
      * @throws ObjectAlreadyAssignedToBranchException   if the car is already assigned to an existing branch.
      */
-    @Transactional
     public void assignCarToBranch(Long carId, Long branchId) {
         Car foundCar = carRepository.findById(carId)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No car under ID #" + carId));
@@ -193,7 +179,6 @@ public class BranchService {
      * @throws ObjectNotFoundInRepositoryException    if no employee is found under the provided employee ID or if no branch is found under the provided branch ID.
      * @throws ObjectAlreadyAssignedToBranchException if the employee is already assigned to an existing branch.
      */
-    @Transactional
     public void assignEmployeeToBranch(Long employeeId, Long branchId) {
         Employee foundEmployee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No employee under ID #" + employeeId));
@@ -219,7 +204,6 @@ public class BranchService {
      * @param branchId   The ID of the branch from which the employee will be removed.
      * @throws ObjectNotFoundInRepositoryException if no branch is found under the provided branch ID or if the specified employee is not assigned to that branch.
      */
-    @Transactional
     public void removeEmployeeFromBranch(Long employeeId, Long branchId) {
         Branch foundBranch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No branch under ID #" + branchId));

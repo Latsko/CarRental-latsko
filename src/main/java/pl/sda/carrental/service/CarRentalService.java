@@ -1,6 +1,5 @@
 package pl.sda.carrental.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.sda.carrental.exceptionHandling.BranchAlreadyOpenInCityException;
@@ -8,19 +7,14 @@ import pl.sda.carrental.exceptionHandling.CarRentalAlreadyExistsException;
 import pl.sda.carrental.exceptionHandling.ObjectNotFoundInRepositoryException;
 import pl.sda.carrental.model.Branch;
 import pl.sda.carrental.model.CarRental;
-import pl.sda.carrental.model.Reservation;
 import pl.sda.carrental.repository.BranchRepository;
 import pl.sda.carrental.repository.CarRentalRepository;
-import pl.sda.carrental.repository.ReservationRepository;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class CarRentalService {
     private final CarRentalRepository carRentalRepository;
     private final BranchRepository branchRepository;
-    private final ReservationRepository reservationRepository;
 
     /**
      * Retrieves the car rental company details.
@@ -41,7 +35,6 @@ public class CarRentalService {
      * @param carRental The CarRental object representing the car rental company to be saved or updated.
      * @throws CarRentalAlreadyExistsException if there already is car rental in repository
      */
-    @Transactional
     public void saveCarRental(CarRental carRental) {
         if(!carRentalRepository.findAll().isEmpty()) {
             throw new CarRentalAlreadyExistsException("Car Rental already exists!");
@@ -56,7 +49,6 @@ public class CarRentalService {
      * @param carRental The CarRental object containing updated information to edit the car rental company.
      * @throws ObjectNotFoundInRepositoryException if there is no existing car rental company to edit.
      */
-    @Transactional
     public void editCarRental(CarRental carRental) {
         CarRental edited = carRentalRepository.findAll().stream().findFirst()
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("There is no car rental company to edit"));
@@ -74,7 +66,6 @@ public class CarRentalService {
      *
      * @throws ObjectNotFoundInRepositoryException if there is no existing car rental company to delete.
      */
-    @Transactional
     public void deleteCarRental() {
         CarRental carRental = carRentalRepository.findAll().stream()
                 .findFirst().orElseThrow(() ->
@@ -96,7 +87,6 @@ public class CarRentalService {
      * @throws ObjectNotFoundInRepositoryException     if the car rental company has not been created yet.
      * @throws BranchAlreadyOpenInCityException        if a branch with the same address is already open in the city.
      */
-    @Transactional
     public void openNewBranch(Branch branch) {
         CarRental carRental = carRentalRepository.findAll().stream()
                 .findFirst()
@@ -125,17 +115,9 @@ public class CarRentalService {
      * @param id The ID of the branch to be deleted.
      * @throws ObjectNotFoundInRepositoryException if no branch is found under the provided ID.
      */
-    @Transactional
     public void closeBranchUnderId(Long id) {
         Branch branch = branchRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No branch under  ID #" + id));
-
-        List<Reservation> reservationsWithThisBranch = reservationRepository.findAll().stream()
-                .filter(reservation -> reservation.getStartBranch().getBranch_id().equals(id) ||
-                        reservation.getEndBranch().getBranch_id().equals(id))
-                .toList();
-
-        reservationRepository.deleteAll(reservationsWithThisBranch);
 
         branch.getClients().clear();
         branch.getCars().clear();

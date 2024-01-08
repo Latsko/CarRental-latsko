@@ -1,6 +1,5 @@
 package pl.sda.carrental.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.sda.carrental.exceptionHandling.ObjectNotFoundInRepositoryException;
@@ -8,7 +7,6 @@ import pl.sda.carrental.exceptionHandling.RentAlreadyExistsForReservationExcepti
 import pl.sda.carrental.model.DTO.RentDTO;
 import pl.sda.carrental.model.Employee;
 import pl.sda.carrental.model.Rent;
-import pl.sda.carrental.model.Reservation;
 import pl.sda.carrental.repository.EmployeeRepository;
 import pl.sda.carrental.repository.RentRepository;
 import pl.sda.carrental.repository.ReservationRepository;
@@ -37,7 +35,6 @@ public class RentService {
      * @param rentDTO An object containing rent data
      * @return The newly created and saved rent object
      */
-    @Transactional
     public Rent save(RentDTO rentDTO) {
         Rent rent = new Rent();
         updateRentDetails(rentDTO, rent);
@@ -55,7 +52,6 @@ public class RentService {
      * @return The modified rent object
      * @throws ObjectNotFoundInRepositoryException if no rent is found with the provided ID
      */
-    @Transactional
     public Rent editRent(Long id, RentDTO rentDTO) {
         Rent rent = rentRepository.findById(id)
                         .orElseThrow(() ->
@@ -72,7 +68,6 @@ public class RentService {
      * @param id The identifier of the rent to be deleted
      * @throws ObjectNotFoundInRepositoryException if no rent is found with the provided ID
      */
-    @Transactional
     public void deleteRentById(Long id) {
         rentRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No rent under ID #" + id));
@@ -90,11 +85,6 @@ public class RentService {
      * @throws ObjectNotFoundInRepositoryException if no employee or reservation is found with the provided ID
      */
     private void updateRentDetails(RentDTO rentDTO, Rent rent) {
-        List<Long> reservationsIds = rentRepository.findRentalsWithReservationId(rentDTO.reservationId());
-        if(!reservationsIds.isEmpty()) {
-            throw new RentAlreadyExistsForReservationException("Rent already exists for reservation with id "
-                    + rentDTO.reservationId());
-        }
 
         Employee foundEmployee = employeeRepository.findById(rentDTO.employeeId())
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No employee under ID #"
@@ -103,13 +93,5 @@ public class RentService {
         rent.setEmployee(foundEmployee);
         rent.setComments(rentDTO.comments());
         rent.setRentDate(rentDTO.rentDate());
-
-        // ======== tutaj nie muszę ustawiać rezerwację? ==========
-        Reservation reservationFromRepository = reservationRepository.findById(rentDTO.reservationId())
-                .orElseThrow(() -> new ObjectNotFoundInRepositoryException("Reservation with id "
-                        + rentDTO.reservationId() + " not found"));
-
-        rent.setReservation(reservationFromRepository);
-        // ======================================================
     }
 }

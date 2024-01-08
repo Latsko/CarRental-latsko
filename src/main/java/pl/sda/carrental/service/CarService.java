@@ -1,6 +1,5 @@
 package pl.sda.carrental.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.sda.carrental.exceptionHandling.ObjectNotFoundInRepositoryException;
@@ -47,7 +46,6 @@ public class CarService {
      *
      * @param car The Car object representing the new car to be added.
      */
-    @Transactional
     public void addCar(Car car) {
         carRepository.save(car);
     }
@@ -63,7 +61,6 @@ public class CarService {
      * @param car The Car object containing updated information for the car.
      * @throws ObjectNotFoundInRepositoryException if no car is found under the provided ID or if the car is not associated with a branch.
      */
-    @Transactional
     public void editCar(Long id, Car car) {
         Car childCar = carRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No car under ID #" + id));
@@ -98,7 +95,6 @@ public class CarService {
      * @param id The ID of the car to be deleted.
      * @throws ObjectNotFoundInRepositoryException if no car is found under the provided ID.
      */
-    @Transactional
     public void deleteCarById(Long id) {
         carRepository.findById(id).orElseThrow(() ->
                 new ObjectNotFoundInRepositoryException("No car under ID #" + id));
