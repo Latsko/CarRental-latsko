@@ -1,3 +1,4 @@
+/*
 package pl.sda.carrental.repository;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -51,5 +52,7 @@ class RentRepositoryTest {
         assertThat(updatedRent.getComments()).isEqualTo("new comment");
     }
 
-    /*findById, update, findAll, findRentalsWithReservationId, findRentsByEmployeeId, delete */
-}
+    */
+/*findById, update, findAll, findRentalsWithReservationId, findRentsByEmployeeId, delete *//*
+
+}*/

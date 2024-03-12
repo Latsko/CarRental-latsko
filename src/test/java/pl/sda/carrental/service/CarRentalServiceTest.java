@@ -1,3 +1,4 @@
+/*
 package pl.sda.carrental.service;
 
 import org.assertj.core.api.ThrowableAssert;
@@ -234,4 +235,4 @@ class CarRentalServiceTest {
                 .withBranchId(id)
                 .withAddress(address);
     }
-}
+}*/

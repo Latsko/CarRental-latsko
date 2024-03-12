@@ -1,3 +1,4 @@
+/*
 package pl.sda.carrental.configuration;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -38,3 +39,4 @@ public class SwaggerConfiguration {
         System.out.println("Swagger-UI url: http://localhost:8080/swagger-ui/index.html");
     }
 }
+*/

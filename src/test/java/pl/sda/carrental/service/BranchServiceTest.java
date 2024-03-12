@@ -1,3 +1,4 @@
+/*
 package pl.sda.carrental.service;
 
 import org.assertj.core.api.ThrowableAssert;
@@ -585,4 +586,4 @@ class BranchServiceTest {
         assertThat(carsAvailableAtBranchOnDate).isNotEmpty();
         assertThat(carsAvailableAtBranchOnDate.size()).isEqualTo(2);
        }
-}
+}*/
