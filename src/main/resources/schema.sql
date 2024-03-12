@@ -120,7 +120,7 @@ DROP TABLE IF EXISTS authority;
 
 CREATE TABLE users
 (
-    id                         INT PRIMARY KEY,
+    id                         BIGINT PRIMARY KEY,
     username                   VARCHAR(50) UNIQUE,
     password                   VARCHAR(100),
     is_account_non_expired     BOOLEAN,
@@ -131,14 +131,14 @@ CREATE TABLE users
 
 CREATE TABLE authority
 (
-    id        INT PRIMARY KEY,
+    id        BIGINT PRIMARY KEY,
     authority VARCHAR(50) UNIQUE
 );
 
 CREATE TABLE user_authorities
 (
-    user_id      INT,
-    authority_id INT,
+    user_id      BIGINT,
+    authority_id BIGINT,
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (authority_id) REFERENCES authority (id),
     PRIMARY KEY (user_id, authority_id)
