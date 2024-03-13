@@ -1,6 +1,6 @@
 package pl.sda.carrental.model;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;

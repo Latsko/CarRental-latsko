@@ -1,63 +1,66 @@
 package pl.sda.carrental.exceptionHandling;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ControllerAdvice
 public class GlobalExceptionHandling {
 
     @ExceptionHandler(ObjectNotFoundInRepositoryException.class)
-    public ProblemDetail handleObjectNotFoundInRepository(ObjectNotFoundInRepositoryException exception) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    public ResponseEntity<Object> handleObjectNotFoundInRepository(ObjectNotFoundInRepositoryException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ReservationTimeCollisionException.class)
-    public ProblemDetail handleReservationTimeCollisionException(ReservationTimeCollisionException exception) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    public ResponseEntity<Object> handleReservationTimeCollisionException(ReservationTimeCollisionException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(ObjectAlreadyAssignedToBranchException.class)
-    public ProblemDetail handleClientAlreadyAssignedToBranch(ObjectAlreadyAssignedToBranchException exception) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    public ResponseEntity<Object> handleClientAlreadyAssignedToBranch(ObjectAlreadyAssignedToBranchException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(BranchAlreadyOpenInCityException.class)
-    public ProblemDetail handleBranchAlreadyOpenInCity(BranchAlreadyOpenInCityException exception) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    public ResponseEntity<Object> handleBranchAlreadyOpenInCity(BranchAlreadyOpenInCityException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(RentAlreadyExistsForReservationException.class)
-    public ProblemDetail handleRentAlreadyExistsForReservation(RentAlreadyExistsForReservationException exception) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    public ResponseEntity<Object> handleRentAlreadyExistsForReservation(RentAlreadyExistsForReservationException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(ReturnAlreadyExistsForReservationException.class)
-    public ProblemDetail handleReturnAlreadyExistsForReservation(ReturnAlreadyExistsForReservationException exception) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    public ResponseEntity<Object> handleReturnAlreadyExistsForReservation(ReturnAlreadyExistsForReservationException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(ObjectAlreadyExistsException.class)
-    public ProblemDetail handleCarRentalAlreadyExistsException(ObjectAlreadyExistsException exception) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    public ResponseEntity<Object> handleCarRentalAlreadyExistsException(ObjectAlreadyExistsException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(IllegalArgumentForStatusException.class)
-    public ProblemDetail handleIllegalArgumentForStatusException(IllegalArgumentForStatusException exception) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    public ResponseEntity<Object> handleIllegalArgumentForStatusException(IllegalArgumentForStatusException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail handleValidationException(MethodArgumentNotValidException exception) {
+    public ResponseEntity<Object> handleValidationException(MethodArgumentNotValidException exception) {
         List<FieldError> fieldErrors = exception.getBindingResult().getFieldErrors();
-        List<String> errors = fieldErrors.stream()
-                .map(fieldError -> fieldError.getField() + " " + fieldError.getDefaultMessage())
-                .toList();
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errors.toString());
+        List<String> errors = new ArrayList<>();
+        for (FieldError fieldError : fieldErrors) {
+            String s = fieldError.getField() + " " + fieldError.getDefaultMessage();
+            errors.add(s);
+        }
+        return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
     }
 }

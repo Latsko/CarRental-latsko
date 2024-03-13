@@ -1,6 +1,7 @@
 package pl.sda.carrental.service;
 
-import jakarta.transaction.Transactional;
+import javax.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.sda.carrental.exceptionHandling.ObjectAlreadyAssignedToBranchException;
@@ -8,6 +9,7 @@ import pl.sda.carrental.exceptionHandling.ObjectNotFoundInRepositoryException;
 import pl.sda.carrental.model.*;
 import pl.sda.carrental.repository.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -100,15 +102,24 @@ public class ClientService {
         clientRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No client under that ID!"));
 
-        List<Rent> rentsAssociatedWithClient = rentRepository.findAll().stream()
-                .filter(rent -> rent.getReservation().getClient().getClientId().equals(id))
-                .toList();
-        List<Returnal> returnsAssociatedWithClient = returnRepository.findAll().stream()
-                .filter(returnal -> returnal.getReservation().getClient().getClientId().equals(id))
-                .toList();
-        List<Reservation> reservationsAssociatedWithClient = reservationRepository.findAll().stream()
-                .filter(reservation -> reservation.getClient().getClientId().equals(id))
-                .toList();
+        List<Rent> rentsAssociatedWithClient = new ArrayList<>();
+        for (Rent rent : rentRepository.findAll()) {
+            if (rent.getReservation().getClient().getClientId().equals(id)) {
+                rentsAssociatedWithClient.add(rent);
+            }
+        }
+        List<Returnal> returnsAssociatedWithClient = new ArrayList<>();
+        for (Returnal returnal : returnRepository.findAll()) {
+            if (returnal.getReservation().getClient().getClientId().equals(id)) {
+                returnsAssociatedWithClient.add(returnal);
+            }
+        }
+        List<Reservation> reservationsAssociatedWithClient = new ArrayList<>();
+        for (Reservation reservation : reservationRepository.findAll()) {
+            if (reservation.getClient().getClientId().equals(id)) {
+                reservationsAssociatedWithClient.add(reservation);
+            }
+        }
 
         rentRepository.deleteAll(rentsAssociatedWithClient);
         returnRepository.deleteAll(returnsAssociatedWithClient);

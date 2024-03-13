@@ -1,6 +1,6 @@
 package pl.sda.carrental.service;
 
-import jakarta.transaction.Transactional;
+import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.sda.carrental.exceptionHandling.BranchAlreadyOpenInCityException;

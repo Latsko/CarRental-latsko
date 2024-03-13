@@ -1,6 +1,9 @@
 package pl.sda.carrental.service;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.sda.carrental.exceptionHandling.ObjectNotFoundInRepositoryException;
@@ -18,6 +21,7 @@ import pl.sda.carrental.repository.ReservationRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -39,9 +43,12 @@ public class ReservationService {
      * @return List of all Reservations
      */
     public List<ReservationDTO> getAllReservations() {
-        return reservationRepository.findAll().stream()
-                .map(this::mapReservationToDTO)
-                .toList();
+        List<ReservationDTO> list = new ArrayList<>();
+        for (Reservation reservation : reservationRepository.findAll()) {
+            ReservationDTO reservationDTO = mapReservationToDTO(reservation);
+            list.add(reservationDTO);
+        }
+        return list;
     }
 
     /**
@@ -85,7 +92,7 @@ public class ReservationService {
      * It retrieves the reservation by ID from the repository, updates its details using the updateReservationDetails method,
      * and then saves the modified reservation back to the repository
      *
-     * @param id The identifier of the reservation to be edited
+     * @param id             The identifier of the reservation to be edited
      * @param reservationDTO An object containing updated reservation data
      * @return The modified reservation object
      * @throws ObjectNotFoundInRepositoryException if no reservation is found with the provided ID.
@@ -105,29 +112,32 @@ public class ReservationService {
      * revenue total and handles potential conflicts with existing reservations and updates revenue for branch.
      *
      * @param reservationDto Object containing updated reservation dat
-     * @param reservation The reservation object to be updated
+     * @param reservation    The reservation object to be updated
      * @throws ObjectNotFoundInRepositoryException if no car or customer is found with the provided ID.
-     * @throws ReservationTimeCollisionException if there are time collisions with existing reservations for the selected car
+     * @throws ReservationTimeCollisionException   if there are time collisions with existing reservations for the selected car
      */
     private void updateReservationDetails(ReservationDTO reservationDto, Reservation reservation) {
-        Car carFromRepo = carRepository.findById(reservationDto.car_id())
+        Car carFromRepo = carRepository.findById(reservationDto.getCar_id())
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No car under that ID"));
 
-        Client clientFromRepo = clientRepository.findById(reservationDto.customer_id())
+        Client clientFromRepo = clientRepository.findById(reservationDto.getCustomer_id())
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No customer under that ID"));
 
         if (!carFromRepo.getReservations().isEmpty()) {
-            List<DateTimePeriod> timeCollision = carFromRepo.getReservations().stream()
-                    .map(resObject -> new DateTimePeriod(resObject.getStartDate(), resObject.getEndDate()))
-                    .filter(dtp -> isDateSuitable(reservationDto, dtp))
-                    .toList();
+            List<DateTimePeriod> timeCollision = new ArrayList<>();
+            for (Reservation resObject : carFromRepo.getReservations()) {
+                DateTimePeriod dtp = new DateTimePeriod(resObject.getStartDate(), resObject.getEndDate());
+                if (isDateSuitable(reservationDto, dtp)) {
+                    timeCollision.add(dtp);
+                }
+            }
             if (!timeCollision.isEmpty()) {
                 throw new ReservationTimeCollisionException("Car cannot be reserved for given time period!");
             }
         }
 
-        reservation.setStartDate(reservationDto.startDate());
-        reservation.setEndDate(reservationDto.endDate());
+        reservation.setStartDate(reservationDto.getStartDate());
+        reservation.setEndDate(reservationDto.getEndDate());
         setStartEndBranch(reservationDto, reservation);
         reservation.setCar(carFromRepo);
         reservation.setClient(clientFromRepo);
@@ -137,7 +147,7 @@ public class ReservationService {
         long daysDifference = ChronoUnit.DAYS.between(reservation.getStartDate(), reservation.getEndDate());
         BigDecimal price = carFromRepo.getPrice().multiply(BigDecimal.valueOf(daysDifference));
 
-        if(!reservationDto.startBranchId().equals(reservationDto.endBranchId())) {
+        if (!reservationDto.getStartBranchId().equals(reservationDto.getEndBranchId())) {
             price = price.add(CROSS_LOCATION_CHARGE);
         }
         reservation.setPrice(price);
@@ -162,9 +172,9 @@ public class ReservationService {
         }
 
         Reservation firstAfter = getFirstReservationAfter(reservation);
-        if(firstAfter != null &&
-        !reservation.getEndBranch().equals(firstAfter.getStartBranch()) &&
-        Math.abs(ChronoUnit.DAYS.between(reservation.getEndDate(), firstAfter.getStartDate())) <= 1) {
+        if (firstAfter != null &&
+                !reservation.getEndBranch().equals(firstAfter.getStartBranch()) &&
+                Math.abs(ChronoUnit.DAYS.between(reservation.getEndDate(), firstAfter.getStartDate())) <= 1) {
             throw new ReservationTimeCollisionException("Car can be returned only to Branch #" +
                     firstAfter.getStartBranch().getBranchId() + " for the selected date!");
         }
@@ -175,7 +185,7 @@ public class ReservationService {
      *
      * @param reservation The reservation for which the previous reservation is sought.
      * @return The first reservation ending before the start date of the specified reservation,
-     *         or {@code null} if no such reservation is found.
+     * or {@code null} if no such reservation is found.
      */
     private Reservation getFirstReservationPreviousTo(Reservation reservation) {
         return reservationRepository.findAll().stream()
@@ -189,7 +199,7 @@ public class ReservationService {
      *
      * @param reservation The reservation for which the subsequent reservation is sought.
      * @return The first reservation starting after the end date of the specified reservation,
-     *         or {@code null} if no such reservation is found.
+     * or {@code null} if no such reservation is found.
      */
     private Reservation getFirstReservationAfter(Reservation reservation) {
         return reservationRepository.findAll().stream()
@@ -204,38 +214,38 @@ public class ReservationService {
      * with the provided data (ReservationDTO)
      *
      * @param reservationDto An object containing reservation data, such as the start date and end date
-     * @param dtp An object representing the time period to be checked
+     * @param dtp            An object representing the time period to be checked
      * @return true if the period is suitable, and false otherwise
      */
     private boolean isDateSuitable(ReservationDTO reservationDto, DateTimePeriod dtp) {
-        return dtp.start().equals(reservationDto.startDate()) ||
-                dtp.end().equals(reservationDto.endDate()) ||
+        return dtp.getStart().equals(reservationDto.getStartDate()) ||
+                dtp.getEnd().equals(reservationDto.getEndDate()) ||
 
-                (dtp.start().isAfter(reservationDto.startDate()) &&
-                        dtp.start().isBefore(reservationDto.endDate())) ||
+                (dtp.getStart().isAfter(reservationDto.getStartDate()) &&
+                        dtp.getStart().isBefore(reservationDto.getEndDate())) ||
 
-                (dtp.end().isAfter(reservationDto.startDate()) &&
-                        dtp.end().isBefore(reservationDto.endDate())) ||
+                (dtp.getEnd().isAfter(reservationDto.getStartDate()) &&
+                        dtp.getEnd().isBefore(reservationDto.getEndDate())) ||
 
-                (dtp.start().isAfter(reservationDto.startDate()) &&
-                        dtp.end().isBefore(reservationDto.endDate())) ||
+                (dtp.getStart().isAfter(reservationDto.getStartDate()) &&
+                        dtp.getEnd().isBefore(reservationDto.getEndDate())) ||
 
-                (dtp.start().isBefore(reservationDto.startDate()) &&
-                        dtp.end().isAfter(reservationDto.endDate()));
+                (dtp.getStart().isBefore(reservationDto.getStartDate()) &&
+                        dtp.getEnd().isAfter(reservationDto.getEndDate()));
     }
 
     /**
      * Sets new start and end branches
      *
      * @param reservationDto Object containing start and end branch data
-     * @param reservation Object for which the start and end branches are to be set
+     * @param reservation    Object for which the start and end branches are to be set
      * @throws ObjectNotFoundInRepositoryException if no employee or reservation is found with the provided ID
      */
     private void setStartEndBranch(ReservationDTO reservationDto, Reservation reservation) {
-        Branch startBranch = branchRepository.findById(reservationDto.startBranchId())
+        Branch startBranch = branchRepository.findById(reservationDto.getStartBranchId())
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("Branch not found"));
         reservation.setStartBranch(startBranch);
-        Branch endBranch = branchRepository.findById(reservationDto.endBranchId())
+        Branch endBranch = branchRepository.findById(reservationDto.getEndBranchId())
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("Branch not found"));
         reservation.setEndBranch(endBranch);
     }
@@ -266,9 +276,9 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No reservation under ID #" + id));
 
-        if(reservation.getRent() != null) {
+        if (reservation.getRent() != null) {
             long daysBetween = Math.abs(ChronoUnit.DAYS.between(LocalDate.now(), reservation.getRent().getRentDate()));
-            if(daysBetween > 2) {
+            if (daysBetween > 2) {
                 revenueService.updateRevenue(reservation.getCar().getBranch().getRevenue().getRevenueId(), reservation.getPrice().negate());
             } else {
                 revenueService.updateRevenue(reservation.getCar().getBranch().getRevenue().getRevenueId(), reservation.getPrice().negate().multiply(BigDecimal.valueOf(0.8)));
@@ -279,5 +289,11 @@ public class ReservationService {
     }
 }
 
-record DateTimePeriod(LocalDate start, LocalDate end) {
+@RequiredArgsConstructor
+@Getter
+@EqualsAndHashCode
+@ToString
+class DateTimePeriod {
+    private final LocalDate start;
+    private final LocalDate end;
 }

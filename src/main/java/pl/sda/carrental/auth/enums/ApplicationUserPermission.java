@@ -1,5 +1,8 @@
 package pl.sda.carrental.auth.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum ApplicationUserPermission {
     STUDENT_READ("student:read"),
     STUDENT_WRITE("student:write"),
@@ -13,7 +16,4 @@ public enum ApplicationUserPermission {
         this.permission = permission;
     }
 
-    public String getPermission() {
-        return permission;
-    }
 }

@@ -3,7 +3,6 @@ package pl.sda.carrental.auth.enums;
 import com.google.common.collect.Sets;
 import lombok.Getter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import pl.sda.carrental.auth.enums.ApplicationUserPermission;
 
 import java.util.Set;
 import java.util.stream.Collectors;

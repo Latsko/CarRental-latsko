@@ -43,9 +43,9 @@ public class ReturnService {
      */
     @Transactional
     public Returnal saveReturn(ReturnDTO returnDTO) {
-        List<Long> reservationsIds = returnRepository.findReturnsWithReservationId(returnDTO.reservationId());
+        List<Long> reservationsIds = returnRepository.findReturnsWithReservationId(returnDTO.getReservationId());
         if(!reservationsIds.isEmpty()) {
-            throw new ReturnAlreadyExistsForReservationException("Return already exists for reservation with id " + returnDTO.reservationId());
+            throw new ReturnAlreadyExistsForReservationException("Return already exists for reservation with id " + returnDTO.getReservationId());
         }
 
         Returnal returnal = new Returnal();
@@ -84,19 +84,19 @@ public class ReturnService {
      * @throws ObjectNotFoundInRepositoryException if no employee or reservation is found with the provided ID
      */
     private void updateReturnalDetails(ReturnDTO returnDTO, Returnal returnalToSave) {
-        Employee employeeFromRepository = employeeRepository.findById(returnDTO.employee())
-                        .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No employee under ID #" + returnDTO.employee()));
+        Employee employeeFromRepository = employeeRepository.findById(returnDTO.getEmployee())
+                        .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No employee under ID #" + returnDTO.getEmployee()));
 
-        Reservation reservationFromRepository = reservationRepository.findById(returnDTO.reservationId())
+        Reservation reservationFromRepository = reservationRepository.findById(returnDTO.getReservationId())
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("Reservation with id "
-                        + returnDTO.reservationId() + " not found"));
+                        + returnDTO.getReservationId() + " not found"));
 
         returnalToSave.setEmployee(employeeFromRepository);
-        returnalToSave.setReturnDate(returnDTO.returnDate());
-        returnalToSave.setComments(returnDTO.comments());
+        returnalToSave.setReturnDate(returnDTO.getReturnDate());
+        returnalToSave.setComments(returnDTO.getComments());
         returnalToSave.setReservation(reservationFromRepository);
-        returnalToSave.setUpcharge(returnDTO.upcharge());
-        revenueService.updateRevenue(returnalToSave.getReservation().getCar().getBranch().getRevenue().getRevenueId(), returnDTO.upcharge());
+        returnalToSave.setUpcharge(returnDTO.getUpcharge());
+        revenueService.updateRevenue(returnalToSave.getReservation().getCar().getBranch().getRevenue().getRevenueId(), returnDTO.getUpcharge());
     }
 
     /**

@@ -1,6 +1,5 @@
 package pl.sda.carrental.auth.dao;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

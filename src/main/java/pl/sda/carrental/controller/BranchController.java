@@ -1,6 +1,9 @@
 package pl.sda.carrental.controller;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.springframework.web.bind.annotation.*;
 import pl.sda.carrental.model.Branch;
 import pl.sda.carrental.model.Car;
@@ -8,6 +11,7 @@ import pl.sda.carrental.model.CarRental;
 import pl.sda.carrental.model.DTO.CarDTO;
 import pl.sda.carrental.service.BranchService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -19,9 +23,12 @@ public class BranchController {
     @GetMapping
     public List<BranchDTO> getBranches() {
 
-        return branchService.getAllBranches().stream()
-                .map(this::mapToBranchDTO)
-                .toList();
+        List<BranchDTO> list = new ArrayList<>();
+        for (Branch branch : branchService.getAllBranches()) {
+            BranchDTO branchDTO = mapToBranchDTO(branch);
+            list.add(branchDTO);
+        }
+        return list;
     }
 
     @GetMapping("/{id}")
@@ -108,8 +115,24 @@ public class BranchController {
     }
 }
 
-record BranchDTO(Long branchId, String branchName, HQDetails mainBranchDetails) {
+@RequiredArgsConstructor
+@Getter
+@EqualsAndHashCode
+@ToString
+class HQDetails {
+    private final String CarRentalName;
+    private final String owner;
+    private final String internetDomain;
+    private final String address;
 }
 
-record HQDetails(String CarRentalName, String owner, String internetDomain, String address) {
+@RequiredArgsConstructor
+@Getter
+@EqualsAndHashCode
+@ToString
+class BranchDTO {
+    private final Long branchId;
+    private final String branchName;
+    private final HQDetails mainBranchDetail;
+
 }

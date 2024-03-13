@@ -120,7 +120,7 @@ DROP TABLE IF EXISTS authority;
 
 CREATE TABLE users
 (
-    id                         BIGINT PRIMARY KEY,
+    id                         BIGINT AUTO_INCREMENT UNIQUE PRIMARY KEY,
     username                   VARCHAR(50) UNIQUE,
     password                   VARCHAR(100),
     is_account_non_expired     BOOLEAN,
@@ -131,7 +131,7 @@ CREATE TABLE users
 
 CREATE TABLE authority
 (
-    id        BIGINT PRIMARY KEY,
+    id        BIGINT AUTO_INCREMENT UNIQUE PRIMARY KEY,
     authority VARCHAR(50) UNIQUE
 );
 

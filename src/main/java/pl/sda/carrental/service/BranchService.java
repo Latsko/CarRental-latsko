@@ -1,6 +1,6 @@
 package pl.sda.carrental.service;
 
-import jakarta.transaction.Transactional;
+import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.sda.carrental.exceptionHandling.ObjectAlreadyAssignedToBranchException;
@@ -70,10 +70,13 @@ public class BranchService {
     @Transactional
     public void removeBranch(Long id) {
         Branch branch = getById(id);
-        List<Reservation> reservationsWithThisBranch = reservationRepository.findAll().stream()
-                .filter(reservation -> reservation.getStartBranch().getBranchId().equals(id) ||
-                        reservation.getEndBranch().getBranchId().equals(id))
-                .toList();
+        List<Reservation> reservationsWithThisBranch = new ArrayList<>();
+        for (Reservation reservation : reservationRepository.findAll()) {
+            if (reservation.getStartBranch().getBranchId().equals(id) ||
+                    reservation.getEndBranch().getBranchId().equals(id)) {
+                reservationsWithThisBranch.add(reservation);
+            }
+        }
 
         reservationRepository.deleteAll(reservationsWithThisBranch);
 
@@ -290,23 +293,35 @@ public class BranchService {
      */
     public List<CarDTO> getCarsAvailableAtBranchOnDate(Long id, String date) {
         Branch foundBranch = getById(id);
-        List<Car> availableCarsAtGivenBranch = new ArrayList<>(foundBranch.getCars().stream()
-                .filter(car -> isDateAvailableForCar(car, LocalDate.parse(date)))
-                .toList());
+        List<Car> list = new ArrayList<>();
+        for (Car car1 : foundBranch.getCars()) {
+            if (isDateAvailableForCar(car1, LocalDate.parse(date))) {
+                list.add(car1);
+            }
+        }
+        List<Car> availableCarsAtGivenBranch = new ArrayList<>(list);
 
         List<Car> carsFromOtherBranches = new ArrayList<>();
         for (Branch branch : branchRepository.findAll()) {
             carsFromOtherBranches.addAll(branch.getCars());
         }
 
-        List<Car> carsWithReturnAtBranch = carsFromOtherBranches.stream()
-                .filter(car -> hasReturnalsAtBranchOnDatePrior(id, car, LocalDate.parse(date)))
-                .toList();
+        List<Car> carsWithReturnAtBranch = new ArrayList<>();
+        for (Car car : carsFromOtherBranches) {
+            if (hasReturnalsAtBranchOnDatePrior(id, car, LocalDate.parse(date))) {
+                carsWithReturnAtBranch.add(car);
+            }
+        }
 
         availableCarsAtGivenBranch.addAll(carsWithReturnAtBranch);
         Set<Car> uniqueCars = new HashSet<>(availableCarsAtGivenBranch);
 
-        return new ArrayList<>(uniqueCars.stream().map(CarService::mapCarToCarDTO).toList());
+        List<CarDTO> result = new ArrayList<>();
+        for (Car uniqueCar : uniqueCars) {
+            CarDTO carDTO = CarService.mapCarToCarDTO(uniqueCar);
+            result.add(carDTO);
+        }
+        return new ArrayList<>(result);
     }
 
     /**

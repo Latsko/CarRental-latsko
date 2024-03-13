@@ -1,6 +1,6 @@
 package pl.sda.carrental.service;
 
-import jakarta.transaction.Transactional;
+import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.sda.carrental.exceptionHandling.ObjectNotFoundInRepositoryException;
@@ -90,24 +90,24 @@ public class RentService {
      * @throws ObjectNotFoundInRepositoryException if no employee or reservation is found with the provided ID
      */
     private void updateRentDetails(RentDTO rentDTO, Rent rent) {
-        List<Long> reservationsIds = rentRepository.findRentalsWithReservationId(rentDTO.reservationId());
+        List<Long> reservationsIds = rentRepository.findRentalsWithReservationId(rentDTO.getReservationId());
         if(!reservationsIds.isEmpty()) {
             throw new RentAlreadyExistsForReservationException("Rent already exists for reservation with id "
-                    + rentDTO.reservationId());
+                    + rentDTO.getReservationId());
         }
 
-        Employee foundEmployee = employeeRepository.findById(rentDTO.employeeId())
+        Employee foundEmployee = employeeRepository.findById(rentDTO.getEmployeeId())
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("No employee under ID #"
-                        + rentDTO.employeeId()));
+                        + rentDTO.getEmployeeId()));
 
         rent.setEmployee(foundEmployee);
-        rent.setComments(rentDTO.comments());
-        rent.setRentDate(rentDTO.rentDate());
+        rent.setComments(rentDTO.getComments());
+        rent.setRentDate(rentDTO.getRentDate());
 
         // ======== tutaj nie muszę ustawiać rezerwację? ==========
-        Reservation reservationFromRepository = reservationRepository.findById(rentDTO.reservationId())
+        Reservation reservationFromRepository = reservationRepository.findById(rentDTO.getReservationId())
                 .orElseThrow(() -> new ObjectNotFoundInRepositoryException("Reservation with id "
-                        + rentDTO.reservationId() + " not found"));
+                        + rentDTO.getReservationId() + " not found"));
 
         rent.setReservation(reservationFromRepository);
         // ======================================================

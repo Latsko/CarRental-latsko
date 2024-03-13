@@ -1,10 +1,24 @@
 package pl.sda.carrental.model.DTO;
 
-import jakarta.validation.constraints.NotNull;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+import javax.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
-public record RentDTO(@NotNull Long employeeId,
-                      String comments,
-                      @NotNull LocalDate rentDate,
-                      @NotNull Long reservationId) {}
+@RequiredArgsConstructor
+@Getter
+@EqualsAndHashCode
+@ToString
+public class RentDTO {
+    @NotNull
+    private final Long employeeId;
+    private final String comments;
+    @NotNull
+    private final LocalDate rentDate;
+    @NotNull
+    private final Long reservationId;
+}

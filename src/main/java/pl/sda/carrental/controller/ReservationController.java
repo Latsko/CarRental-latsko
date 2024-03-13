@@ -1,6 +1,6 @@
 package pl.sda.carrental.controller;
 
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pl.sda.carrental.model.DTO.ReservationDTO;

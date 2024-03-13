@@ -1,21 +1,28 @@
 package pl.sda.carrental.auth.entity;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.util.Collection;
 import java.util.Set;
 
 @Entity
 @Table(name = "users")
 public class ApplicationUserEntity implements UserDetails {
+    @Setter
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @Setter
     private String username;
+    @Setter
     private String password;
-    //    private final Set<? extends GrantedAuthority> grantedAuthorities;
+
+    @Setter
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "user_authorities",
@@ -86,26 +93,6 @@ public class ApplicationUserEntity implements UserDetails {
     @Override
     public boolean isEnabled() {
         return isEnabled;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setAuthorities(Set<Authority> authorities) {
-        this.authorities = authorities;
     }
 
     public void setAccountNonExpired(boolean accountNonExpired) {

@@ -2,10 +2,10 @@ package pl.sda.carrental.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Digits;
+import javax.persistence.*;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import lombok.*;
 import pl.sda.carrental.model.enums.Status;
 
@@ -26,11 +26,8 @@ public class Car {
     @Column(name = "car_id")
     private Long carId;
     private String make;
+    @Getter
     private String model;
-
-    public String getModel() {
-        return model;
-    }
 
     @Column(name = "body_style")
     private String bodyStyle;
